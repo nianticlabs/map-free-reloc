@@ -1,0 +1,8 @@
+MODEL: 'FeatureMatching'
+FEATURE_MATCHING: 'Precomputed'
+POSE_SOLVER: 'Procrustes'
+DATASET:
+  ESTIMATED_DEPTH: 'data/scannet_misc/scannet_test_depthmaps_dpt.npz'
+MATCHES_FILE_PATH: 'data/scannet_misc/correspondences_LoFTR_scannet_test.npz'
+PROCRUSTES:
+  MAX_CORR_DIST: 0.05 # meters

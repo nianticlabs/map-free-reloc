@@ -1,0 +1,10 @@
+DATASET:
+  DATA_SOURCE: 'MapFree'
+  DATA_ROOT: 'data/mapfree/'
+  SCENES: None  # should be a list [] or None. If none, use all scenes.
+  ESTIMATED_DEPTH: None  # To load estimated depth map, provide the suffix to the depth files, e.g. 'dptnyu', 'dptkiti'
+  AUGMENTATION_TYPE: None
+  HEIGHT: 720
+  WIDTH: 540
+  MIN_OVERLAP_SCORE: 0.2  # [train only] discard data with overlap_score < min_overlap_score
+  MAX_OVERLAP_SCORE: 0.7  # [train only] discard data with overlap_score < min_overlap_score

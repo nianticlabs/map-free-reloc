@@ -1,0 +1,10 @@
+MODEL: 'FeatureMatching'
+FEATURE_MATCHING: 'Precomputed'
+POSE_SOLVER: 'EssentialMatrixMetric'
+MATCHES_FILE_PATH: 'data/scannet_misc/correspondences_LoFTR_scannet_test.npz'
+DATASET:
+  ESTIMATED_DEPTH: 'data/scannet_misc/scannet_test_depthmaps_planercnn.npz'
+EMAT_RANSAC:
+  PIX_THRESHOLD: 2.0
+  SCALE_THRESHOLD: 0.1
+  CONFIDENCE: 0.9999

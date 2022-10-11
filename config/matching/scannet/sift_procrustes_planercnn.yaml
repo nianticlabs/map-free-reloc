@@ -1,0 +1,10 @@
+MODEL: 'FeatureMatching'
+FEATURE_MATCHING: 'SIFT'
+POSE_SOLVER: 'Procrustes'
+DATASET:
+  ESTIMATED_DEPTH: 'data/scannet_misc/scannet_test_depthmaps_planercnn.npz'
+SIFT:
+  NUM_FEATURES: 2048
+  RATIO_THRESHOLD: 0.8
+PROCRUSTES:
+  MAX_CORR_DIST: 0.05 # meters

@@ -1,0 +1,10 @@
+MODEL: 'FeatureMatching'
+FEATURE_MATCHING: 'Precomputed'
+POSE_SOLVER: 'EssentialMatrixMetric'
+DATASET:
+  ESTIMATED_DEPTH: 'dptnyu'
+MATCHES_FILE_PATH: '{scene_root}/correspondences_LoFTR.npz'
+EMAT_RANSAC:
+  PIX_THRESHOLD: 2.0
+  SCALE_THRESHOLD: 0.1
+  CONFIDENCE: 0.9999

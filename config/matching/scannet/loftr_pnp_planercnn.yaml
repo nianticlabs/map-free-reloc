@@ -1,0 +1,10 @@
+MODEL: 'FeatureMatching'
+FEATURE_MATCHING: 'Precomputed'
+POSE_SOLVER: 'PNP'
+MATCHES_FILE_PATH: 'data/scannet_misc/correspondences_LoFTR_scannet_test.npz'
+DATASET:
+  ESTIMATED_DEPTH: 'data/scannet_misc/scannet_test_depthmaps_planercnn.npz'
+PNP:
+  RANSAC_ITER: 1000
+  REPROJECTION_INLIER_THRESHOLD: 3
+  CONFIDENCE: 0.9999

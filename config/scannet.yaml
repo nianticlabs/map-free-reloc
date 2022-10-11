@@ -1,0 +1,10 @@
+DATASET:
+  DATA_SOURCE: 'ScanNet'
+  DATA_ROOT: 'data/scannet/'
+  NPZ_ROOT: 'data/scannet_indices/scene_data'
+ # general options
+  MIN_OVERLAP_SCORE: 0.4  # discard data with overlap_score < min_overlap_score
+  AUGMENTATION_TYPE: None  # options: [None, 'dark', 'mobile']
+  ESTIMATED_DEPTH: None    # Loads GT depth maps. To load estimated depthmaps, provide the path to the NPZ file containing them
+  HEIGHT: 480
+  WIDTH: 640

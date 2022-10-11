@@ -1,0 +1,6 @@
+[submodule "etc/feature_matching_baselines/LoFTR"]
+	path = etc/feature_matching_baselines/LoFTR
+	url = git@github.com:zju3dv/LoFTR.git
+[submodule "etc/feature_matching_baselines/SuperGlue"]
+	path = etc/feature_matching_baselines/SuperGlue
+	url = git@github.com:magicleap/SuperGluePretrainedNetwork.git

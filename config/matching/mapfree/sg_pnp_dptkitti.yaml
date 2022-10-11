@@ -1,0 +1,10 @@
+MODEL: 'FeatureMatching'
+FEATURE_MATCHING: 'Precomputed'
+POSE_SOLVER: 'PNP'
+DATASET:
+  ESTIMATED_DEPTH: 'dptkitti'
+MATCHES_FILE_PATH: '{scene_root}/correspondences_SG.npz'
+PNP:
+  RANSAC_ITER: 1000
+  REPROJECTION_INLIER_THRESHOLD: 3
+  CONFIDENCE: 0.9999

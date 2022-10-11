@@ -1,0 +1,13 @@
+DATASET:
+  DATA_SOURCE: '7Scenes'
+  DATA_ROOT: 'data/sevenscenes'
+  SCENES: None  # scenes to use (for 7Scenes); should be a list [] or None. If none, use all scenes.
+  PAIRS_TXT:
+    TRAIN: 'train_pairs.4nn.medium.txt'
+    VAL: 'val_pairs.3nn.medium.txt'
+    TEST: 'test_pairs.5nn.5cm10m.vlad.minmax.txt'
+ # general options
+  ESTIMATED_DEPTH: None  # None loads GT depth maps. To load estimated depth map, provide the suffix to the depth files, e.g. 'prcnn' loads PlaneRCNN depth estimates
+  AUGMENTATION_TYPE: None
+  HEIGHT: 480
+  WIDTH: 640

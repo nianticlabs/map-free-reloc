@@ -1,0 +1,8 @@
+MODEL: 'FeatureMatching'
+FEATURE_MATCHING: 'Precomputed'
+POSE_SOLVER: 'Procrustes'
+DATASET:
+  ESTIMATED_DEPTH: 'dptkitti'
+MATCHES_FILE_PATH: '{scene_root}/correspondences_SG.npz'
+PROCRUSTES:
+  MAX_CORR_DIST: 0.05 # meters

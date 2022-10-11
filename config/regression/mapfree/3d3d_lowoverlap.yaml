@@ -1,0 +1,35 @@
+MODEL: 'Regression'
+ENCODER:
+  TYPE: 'ResUNet'
+  BLOCK_TYPE: 1
+  NUM_BLOCKS: '3-3-3'
+  NOT_CONCAT: False
+  NUM_OUT_LAYERS: 32
+AGGREGATOR:
+  TYPE: 'CorrelationVolumeWarping'
+  POSITION_ENCODER: True
+  MAX_SCORE_CHANNEL: True
+HEAD:
+  TYPE: 'ProcrustesDeepResBlock'
+  ADD_BASIS: True
+  AVG_POOL: True
+TRAINING:
+  BATCH_SIZE: 10
+  NUM_WORKERS: 10
+  SAMPLER: 'scene_balance'
+  N_SAMPLES_SCENE: 700
+  SAMPLE_WITH_REPLACEMENT: True
+  LR: 1e-4
+  LOG_INTERVAL: 50
+  VAL_INTERVAL: 0.25
+  VAL_BATCHES: 500
+  EPOCHS: 50
+  ROT_LOSS: 'rot_angle_loss'
+  TRANS_LOSS: 'trans_l1_loss'
+  LAMBDA: 1.
+BACKPROJECT_ANCHORS: False
+DATASET:
+  HEIGHT: 360
+  WIDTH: 270
+  MIN_OVERLAP_SCORE: 0.2  # [train only] discard data with overlap_score < min_overlap_score
+  MAX_OVERLAP_SCORE: 0.8  # [train only] discard data with overlap_score < min_overlap_score
