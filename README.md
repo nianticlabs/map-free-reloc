@@ -17,7 +17,7 @@
      <a href="https://twitter.com/eric_brachmann">Eric Brachmann</a>
   </p>
   <h2 align="center">ECCV 2022</h2>
-  <h3 align="center"><a href="https://research.nianticlabs.com/mapfree-reloc-benchmark">Project Page</a> | <a href="https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/MapFreeReloc-ECCV22-paper.pdf">Paper</a> | <a href="">arXiv</a> | <a href="https://storage.cloud.google.com/niantic-lon-static/research/map-free-reloc/MapFreeReloc-ECCV22-supplemental.pdf">Supplemental</a> </h3> 
+  <h3 align="center"><a href="https://research.nianticlabs.com/mapfree-reloc-benchmark">Project Page</a> | <a href="https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/MapFreeReloc-ECCV22-paper.pdf">Paper</a> | <a href="https://arxiv.org/abs/2210.05494">arXiv</a> | <a href="https://storage.cloud.google.com/niantic-lon-static/research/map-free-reloc/MapFreeReloc-ECCV22-supplemental.pdf">Supplemental</a> </h3> 
   <div align="center"></div>
 </p>
 

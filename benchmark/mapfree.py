@@ -50,7 +50,7 @@ def compute_scene_metrics(dataset_path: Path, submission_path: Path, scene: str)
     else:
         logging.info(f'Loaded estimated poses for scene {scene}')
 
-    # The test set is subsampled by a factor of 5
+    # The val/test set is subsampled by a factor of 5
     gt_poses = subsample_poses(gt_poses, subsample=5)
 
     # failures encode how many frames did not have an estimate

@@ -170,7 +170,7 @@ class MapFreeDataset(data.ConcatDataset):
         # If None, no depth. Otherwise, loads depth map with name `frame_00000.suffix.png` where suffix is estimated_depth
         estimated_depth = cfg.DATASET.ESTIMATED_DEPTH
         overlap_limits = (cfg.DATASET.MIN_OVERLAP_SCORE, cfg.DATASET.MAX_OVERLAP_SCORE)
-        sample_factor = {'train': 1, 'val': 10, 'test': 5}[mode]
+        sample_factor = {'train': 1, 'val': 5, 'test': 5}[mode]
 
         if scenes is None:
             # Locate all scenes of the current dataset
