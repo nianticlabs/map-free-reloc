@@ -39,7 +39,7 @@ def parse_7scenes_matching_pairs(pair_txt):
     return im_pairs
 
 
-def parse_oneshot_query_frames(pose_path):
+def parse_mapfree_query_frames(pose_path):
     """
     Get list of query frames given a pose path
     :param pose_path:

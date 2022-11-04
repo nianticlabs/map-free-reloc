@@ -149,7 +149,7 @@ class MapFreeScene(data.Dataset):
             'abs_c_1': c2,
             'K_color0': self.K[im1_path].copy(),  # (3, 3)
             'K_color1': self.K[im2_path].copy(),  # (3, 3)
-            'dataset_name': 'Oneshot',
+            'dataset_name': 'Mapfree',
             'scene_id': self.scene_root.stem,
             'scene_root': str(self.scene_root),
             'pair_id': index*self.sample_factor,

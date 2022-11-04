@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from utils import parse_7scenes_matching_pairs, parse_oneshot_query_frames, stack_pts, load_scannet_imgpaths
+from utils import parse_7scenes_matching_pairs, parse_mapfree_query_frames, stack_pts, load_scannet_imgpaths
 from matchers import LoFTR_matcher, SuperGlue_matcher, SIFT_matcher
 
 MATCHERS = {'LoFTR': LoFTR_matcher, 'SG': SuperGlue_matcher, 'SIFT': SIFT_matcher}
@@ -34,8 +34,8 @@ def get_parser():
     elif dataset == 'Scannet':
         args.data_root = '../../data/scannet/scans_test'
         resize = 640, 480
-    elif dataset == 'Oneshot':
-        args.data_root = Path('../../data/oneshot/')
+    elif dataset == 'Mapfree':
+        args.data_root = Path('../../data/mapfree/')
         test_scenes = [folder for folder in (args.data_root / 'test').iterdir() if folder.is_dir()]
         val_scenes = [folder for folder in (args.data_root / 'val').iterdir() if folder.is_dir()]
         args.scenes = test_scenes + val_scenes
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     elif args.dataset == 'Mapfree':
         for scene_dir in args.scenes:
-            query_frames_paths = parse_oneshot_query_frames(scene_dir / 'poses.txt')
+            query_frames_paths = parse_mapfree_query_frames(scene_dir / 'poses.txt')
             im_pairs_path = [(str(scene_dir / 'seq0' / 'frame_00000.jpg'),
                               str(scene_dir / qpath)) for qpath in query_frames_paths]
 
