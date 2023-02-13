@@ -281,6 +281,7 @@ Please cite our work if you find it useful or use any of our code
 Copyright © Niantic, Inc. 2022. Patent Pending. All rights reserved. This code is for non-commercial use. Please see the [license file](LICENSE) for terms.
 
 # :pencil: Changelog
+- 13/02/2023: updated LICENSE terms
 
 # :octocat: Acknowledgements
 We use part of the code from different repositories. We thank the authors and maintainers of the following repositories.
