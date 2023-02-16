@@ -29,7 +29,7 @@ def load_poses(file: typing.IO, load_confidence: bool = False):
 
     poses = dict()
     for line_number, line in enumerate(file.readlines()):
-        parts = list(line.strip().split(' '))
+        parts = tuple(line.strip().split(' '))
 
         if len(parts) != expected_parts:
             logging.warning(
@@ -50,8 +50,11 @@ def load_poses(file: typing.IO, load_confidence: bool = False):
             continue
 
         try:
-            qw, qx, qy, qz, tx, ty, tz = map(float, parts[1:8])
-            confidence = float(parts[8]) if load_confidence else None
+            parts_float = tuple(map(float, parts[1:]))
+            if any(np.isnan(v) or np.isinf(v) for v in parts_float):
+                raise ValueError()
+            qw, qx, qy, qz, tx, ty, tz = parts_float[:7]
+            confidence = parts_float[7] if load_confidence else None
         except ValueError:
             logging.warning(
                 f'Error parsing pose in file {file.name} line {line_number}. Ignoring line.')

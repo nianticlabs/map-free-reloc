@@ -14,7 +14,7 @@ import benchmark.config as config
 from config.default import cfg
 
 
-def compute_scene_metrics(dataset_path: Path, submission_path: Path, scene: str):
+def compute_scene_metrics(dataset_path: Path, submission_zip: ZipFile, scene: str):
     metric_manager = MetricManager()
 
     # load intrinsics and poses
@@ -31,21 +31,17 @@ def compute_scene_metrics(dataset_path: Path, submission_path: Path, scene: str)
 
     # try to load estimated poses from submission
     try:
-        with ZipFile(submission_path, 'r') as zipfile:
-            with zipfile.open(f'pose_{scene}.txt') as estimated_poses_file:
-                estimated_poses_file_wrapper = TextIOWrapper(
-                    estimated_poses_file, encoding='utf-8')
-                estimated_poses = load_poses(
-                    estimated_poses_file_wrapper, load_confidence=True)
+        with submission_zip.open(f'pose_{scene}.txt') as estimated_poses_file:
+            estimated_poses_file_wrapper = TextIOWrapper(
+                estimated_poses_file, encoding='utf-8')
+            estimated_poses = load_poses(
+                estimated_poses_file_wrapper, load_confidence=True)
     except KeyError as e:
         logging.warning(
             f'Submission does not have estimates for scene {scene}.')
         return dict(), len(gt_poses)
     except UnicodeDecodeError as e:
         logging.error('Unsupported file encoding: please use UTF-8')
-        raise
-    except FileNotFoundError as e:
-        logging.error(f'Could not find ZIP file in path {submission_path}')
         raise
     else:
         logging.info(f'Loaded estimated poses for scene {scene}')
@@ -67,8 +63,6 @@ def compute_scene_metrics(dataset_path: Path, submission_path: Path, scene: str)
     for frame_num, (q_gt, t_gt, _) in gt_poses.items():
         if frame_num not in estimated_poses:
             failures += 1
-            logging.warning(
-                f'No pose estimate for frame {frame_num} in scene {scene}')
             continue
 
         q_est, t_est, confidence = estimated_poses[frame_num]
@@ -119,20 +113,47 @@ def aggregate_results(all_results, all_failures):
     output_metrics[f'AUC @ Pose Error < ({config.t_threshold*100}cm, {config.R_threshold}deg)'] = auc_pose
     output_metrics[f'Precision @ VCRE < {config.vcre_threshold}px'] = prec_vcre
     output_metrics[f'AUC @ VCRE < {config.vcre_threshold}px'] = auc_vcre
+    output_metrics[f'Estimates for % of frames'] = len(all_metrics['trans_err']) / total_samples
     return output_metrics
+
+
+def count_unexpected_scenes(scenes: tuple, submission_zip: ZipFile):
+    submission_scenes = [fname[5:-4]
+                         for fname in submission_zip.namelist() if fname.startswith("pose_")]
+    return len(set(submission_scenes) - set(scenes))
 
 
 def main(args):
     dataset_path = args.dataset_path / args.split
-    scenes = (f.name for f in dataset_path.iterdir() if f.is_dir())
+    scenes = tuple(f.name for f in dataset_path.iterdir() if f.is_dir())
+
+    try:
+        submission_zip = ZipFile(args.submission_path, 'r')
+    except FileNotFoundError as e:
+        logging.error(f'Could not find ZIP file in path {args.submission_path}')
+        return
 
     all_results = dict()
     all_failures = 0
     for scene in scenes:
         metrics, failures = compute_scene_metrics(
-            dataset_path, args.submission_path, scene)
+            dataset_path, submission_zip, scene)
         all_results[scene] = metrics
         all_failures += failures
+
+    if all_failures > 0:
+        logging.warning(
+            f'Submission is missing pose estimates for {all_failures} frames')
+
+    unexpected_scene_count = count_unexpected_scenes(scenes, submission_zip)
+    if unexpected_scene_count > 0:
+        logging.warning(
+            f'Submission contains estimates for {unexpected_scene_count} scenes outside the {args.split} set')
+
+    if all((len(metrics) == 0 for metrics in all_results.values())):
+        logging.error(
+            f'Submission does not have any valid pose estimates')
+        return
 
     output_metrics = aggregate_results(all_results, all_failures)
     output_json = json.dumps(output_metrics, indent=2)
@@ -158,4 +179,7 @@ if __name__ == '__main__':
         args.dataset_path = Path(cfg.DATASET.DATA_ROOT)
 
     logging.basicConfig(level=args.log.upper())
-    main(args)
+    try:
+        main(args)
+    except Exception:
+        logging.error("Unexpected behaviour. Exiting.")

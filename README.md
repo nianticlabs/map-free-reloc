@@ -282,6 +282,7 @@ Copyright © Niantic, Inc. 2022. Patent Pending. All rights reserved. This code 
 
 # :pencil: Changelog
 - 13/02/2023: updated LICENSE terms
+- 20/02/2023: benchmark/mapfree.py gives more helpful warnings
 
 # :octocat: Acknowledgements
 We use part of the code from different repositories. We thank the authors and maintainers of the following repositories.
