@@ -129,6 +129,8 @@ We provide a reference PyTorch dataloader for our dataset in [lib/datasets/mapfr
 # :bar_chart: Evaluate Your Method 
 We provide an [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/benchmark) to evaluate submissions on the test set.
 
+Note that, for the public leaderboard, **we only allow submissions that use single query frames** for their estimates. That is, methods using multi-frame queries are not allowed. If you are interested in a multi-frame version of the task, please reach out to mapfree-reloc@nianticlabs.com as we might extend the benchmark in the future.
+
 ## Submission Format
 The submission file is a ZIP file containing one txt file per scene:
 ```
