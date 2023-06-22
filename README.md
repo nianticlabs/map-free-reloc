@@ -102,7 +102,7 @@ where $q$ is the quaternion encoding rotation and $t$ is the **metric** translat
 Note:
 - The pose is given in world-to-camera format, i.e. $R(q), t$ transform a world point $p$ to the camera coordinate system as $Rp + t$.
 - For val/test scenes, the reference frame (`seq0/frame_00000.jpg`) always has identity pose and the pose of query frames (`seq1/frame_*.jpg`) are given relative to the reference frame. Thus, the absolute pose of a given query frame is equivalent to the relative pose between the reference and the query frames.
-- We **DO NOT** provide ground-truth poses for the **test** scenes. These are kept private for evaluation in our [online benchmarking website](https://research.nianticlabs.com/mapfree-reloc-benchmark/benchmark). The poses provided for test sequences are invalid lines containing 0 for all parameters.
+- We **DO NOT** provide ground-truth poses for the **test** scenes. These are kept private for evaluation in our [online benchmarking website](https://research.nianticlabs.com/mapfree-reloc-benchmark/). The poses provided for test sequences are invalid lines containing 0 for all parameters.
 - There might be "skipped frames", i.e. the linear id of a frame does not necessarily correspond to its frame number. 
 
 ### **overlaps.npz**
@@ -127,7 +127,7 @@ Note:
 We provide a reference PyTorch dataloader for our dataset in [lib/datasets/mapfree.py](lib/datasets/mapfree.py).
 
 # :bar_chart: Evaluate Your Method 
-We provide an [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/benchmark) to evaluate submissions on the test set.
+We provide an [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/) to evaluate submissions on the test set.
 
 Note that, for the public leaderboard, **we only allow submissions that use single query frames** for their estimates. That is, methods using multi-frame queries are not allowed. If you are interested in a multi-frame version of the task, please reach out to mapfree-reloc@nianticlabs.com as we might extend the benchmark in the future.
 
@@ -155,7 +155,7 @@ We provide a [submission script](submission.py) to generate submission files:
 python submission.py <config file> [--checkpoint <path_to_model_checkpoint>] -o results/your_method
 ```
 
-The resulting file `results/your_method/submission.zip` can be uploaded to our [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/benchmark) and compared against existing methods in our [leaderboard](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard).
+The resulting file `results/your_method/submission.zip` can be uploaded to our [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/submit) and compared against existing methods in our [leaderboard](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard).
 
 ## Local evaluation
 We do **NOT** provide ground-truth poses for the test set. But you can still evaluate your method locally, *e.g.* for hyperparameter tuning or model selection, by generating a submission on the **validation set**
@@ -283,8 +283,9 @@ Please cite our work if you find it useful or use any of our code
 Copyright © Niantic, Inc. 2022. Patent Pending. All rights reserved. This code is for non-commercial use. Please see the [license file](LICENSE) for terms.
 
 # :pencil: Changelog
-- 13/02/2023: updated LICENSE terms
+- 22/06/2023: updated README.md leaderboard links
 - 20/02/2023: benchmark/mapfree.py gives more helpful warnings
+- 13/02/2023: updated LICENSE terms
 
 # :octocat: Acknowledgements
 We use part of the code from different repositories. We thank the authors and maintainers of the following repositories.
