@@ -256,6 +256,9 @@ For example, `data/mapfree/test/s00525/frame_00000.jpg`, will have corresponding
 
 To use the custom depth maps, create a new config file, see *e.g.* [config/matching/mapfree/sg_emat_dptkitty.yaml](config/matching/mapfree/sg_emat_dptkitti.yaml), and add the key `ESTIMATED_DEPTH: 'yourdepthmethod'`.
 
+**Externally provided custom depth estimation methods:**
+- [KBR depth predictions](https://github.com/jspenmar/slowtv_monodepth#mapfreereloc)
+
 ## Custom pose solver
 We provide three [pose solvers](lib/models/matching/pose_solver.py): Essential Matrix Decomposition (with metric pose using estimated depth), Perspective-n-Point (PnP) and Procrustes (rigid body transformation given 3D-3D correspondences).
 
@@ -283,6 +286,7 @@ Please cite our work if you find it useful or use any of our code
 Copyright © Niantic, Inc. 2022. Patent Pending. All rights reserved. This code is for non-commercial use. Please see the [license file](LICENSE) for terms.
 
 # :pencil: Changelog
+- 31/08/2023: updated README.md with externally provdided depthmaps 
 - 22/06/2023: updated README.md leaderboard links
 - 20/02/2023: benchmark/mapfree.py gives more helpful warnings
 - 13/02/2023: updated LICENSE terms
