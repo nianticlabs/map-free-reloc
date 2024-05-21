@@ -229,6 +229,13 @@ We provide a [submission script](submission.py) to generate submission files:
 python submission.py <config file> [--checkpoint <path_to_model_checkpoint>] -o results/your_method
 ```
 
+The script reads the configuration of the dataset and the model to determine which track it runs.
+To switch between the single and multi-frame setup, configure the `QUERY_FRAME_COUNT` variable in the [Map-free dataset file](config/mapfree.yaml) as:
+* QUERY_FRAME_COUNT: 1 # (single frame task) or
+* QUERY_FRAME_COUNT: 9 # (multi-frame task)
+
+The model can be also configured accordingly depending on whether it expects single or multiple frames as input. See the [model builder file](lib/builder.py).
+
 The resulting file `results/your_method/submission.zip` can be uploaded to our [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/submit) and compared against existing methods in our [leaderboard](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard).
 
 ## Local evaluation
@@ -283,6 +290,10 @@ Resume training from a checkpoint by adding `--resume {path_to_checkpoint}`
 
 The top five models, according to validation loss, are saved during training.
 Tensorboard results and checkpoints are saved into the folder `weights/experiment_name`.
+
+To switch between the single and multi-frame setup, configure the `QUERY_FRAME_COUNT` variable in the [Map-free dataset file](config/mapfree.yaml) as:
+* QUERY_FRAME_COUNT: 1 # (single frame task) or
+* QUERY_FRAME_COUNT: 9 # (multi-frame task)
 
 # Feature Matching + Scale from Depth Baselines
 We provide different feature matching (SIFT, [SuperPoint+SuperGlue](https://github.com/magicleap/SuperGluePretrainedNetwork), [LoFTR](https://github.com/zju3dv/LoFTR)), depth regression ([DPT](https://github.com/isl-org/DPT) KITTI, NYU) and pose solver (Essential Matrix Decomposition, PnP) variants.
