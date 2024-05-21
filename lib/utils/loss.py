@@ -4,7 +4,7 @@ import inspect
 import torch
 import torch.nn.functional as F
 from scipy.spatial.transform import Rotation
-from kornia.geometry.conversions import rotation_matrix_to_quaternion, QuaternionCoeffOrder
+from kornia.geometry.conversions import rotation_matrix_to_quaternion
 
 
 def data_wrapper(func):
@@ -26,8 +26,7 @@ def data_wrapper(func):
         if 'q' in arg_list:
             arguments['q'] = data['q']
             qgt = rotation_matrix_to_quaternion(
-                arguments['Rgt'].contiguous(),
-                order=QuaternionCoeffOrder.WXYZ)
+                arguments['Rgt'].contiguous())
             # enforces using a single quaternion hemishehere (avoiding q, -q duble representation)
             qgt *= torch.sign(qgt[:, 0:1])
             arguments['qgt'] = qgt

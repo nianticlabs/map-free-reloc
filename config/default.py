@@ -86,7 +86,8 @@ _CN.DATASET.WIDTH = None
 _CN.DATASET.ESTIMATED_DEPTH = None  # Use 'estimated' predictions of depth map, if None uses GT depth map
                                     # For Scannet: path to NPZ storing the depth maps (for a given method); if None use GT depth
                                     # For 7Scenes: suffix to add to depthpath when loading depth maps;  if None use GT depth
-                                    # For Mapfree: suffix to add to depthpath when loading depth maps;  if None, no depth 
+                                    # For Mapfree: suffix to add to depthpath when loading depth maps;  if None, no depth
+_CN.DATASET.QUERY_FRAME_COUNT = 1   # number of query frames to infer from. 1 or 9
 
 ############# TRAINING #############
 _CN.TRAINING = CN()

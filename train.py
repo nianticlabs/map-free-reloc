@@ -11,7 +11,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from config.default import cfg
 from lib.datasets.datamodules import DataModule
-from lib.models.regression.model import RegressionModel
+from lib.models.regression.model import RegressionModel, RegressionMultiFrameModel
 
 
 def main(args):
@@ -19,7 +19,12 @@ def main(args):
     cfg.merge_from_file(args.config)
 
     datamodule = DataModule(cfg)
-    model = RegressionModel(cfg)
+    if cfg.MODEL == 'RegressionMultiFrame':
+        model = RegressionMultiFrameModel(cfg)
+    elif cfg.MODEL == 'Regression':
+        model = RegressionModel(cfg)
+    else:
+        raise NotImplementedError(f'Invalid model {cfg.MODEL}')
 
     logger = TensorBoardLogger(save_dir='weights', name=args.experiment)
 
@@ -39,21 +44,34 @@ def main(args):
     )
 
     lr_monitoring_callback = pl.callbacks.LearningRateMonitor(logging_interval='step')
-    trainer = pl.Trainer(gpus=1,
+    trainer = pl.Trainer(devices=1,
                          log_every_n_steps=cfg.TRAINING.LOG_INTERVAL,
                          val_check_interval=cfg.TRAINING.VAL_INTERVAL,
                          limit_val_batches=cfg.TRAINING.VAL_BATCHES,
                          max_epochs=cfg.TRAINING.EPOCHS,
                          logger=logger,
                          callbacks=[checkpoint_callback, lr_monitoring_callback, epochend_callback],
-                         num_sanity_val_steps=0,
-                         gradient_clip_val=cfg.TRAINING.GRAD_CLIP,
-                         track_grad_norm=-1)
+                         num_sanity_val_steps=1,
+                         gradient_clip_val=cfg.TRAINING.GRAD_CLIP)
+                         # track_grad_norm=-1) # TODO: put back the equivalent!
 
     trainer.fit(model, datamodule, ckpt_path=args.resume)
 
 
 if __name__ == '__main__':
+    """
+    Single-frame query:
+    ```shell
+    python3 train.py \
+      config/regression/mapfree/3d3d.yaml config/mapfree.yaml
+    ```
+    
+    Multi-frame query:
+    ```shell
+    python3 train.py \
+      config/regression/mapfree/multiframe/3d3d_multi.yaml config/mapfree.yaml
+    ```
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('config', help='path to config file')
     parser.add_argument('dataset_config', help='path to dataset config file')

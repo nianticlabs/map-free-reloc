@@ -131,7 +131,7 @@ def quat_angle_error(label, pred, variant=VARIANTS_ANGLE_SIN) -> np.ndarray:
 
 def precision_recall(inliers, tp, failures):
     """
-    Computes Precision/Recall plot for a set of poses given inliers (confidence) and wether the
+    Computes Precision/Recall plot for a set of poses given inliers (confidence) and whether the
     estimated pose error (whatever it may be) is within a threshold.
     Each point in the plot is obtained by choosing a threshold for inliers (i.e. inlier_thr).
     Recall measures how many images have inliers >= inlier_thr

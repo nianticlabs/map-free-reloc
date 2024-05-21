@@ -37,6 +37,8 @@ We crowd-sourced a substantial new [dataset](#camera-map-free-visual-relocalizat
 1. [Our dataset](#camera-map-free-visual-relocalization-dataset)
 1. [Evaluate your method](#bar_chart-evaluate-your-method)
 1. [Baselines: Relative Pose Regression](#relative-pose-regression-baselines)
+   1. [Single Frame track](#single-frame-track)
+   1. [Multi Frame track](#multi-frame-track)
 1. [Baselines: Feature Matching + Scale from Estimated Depth](#feature-matching--scale-from-depth-baselines)
 1. [Extended Results (7Scenes & Scannet)](#results-on-scannet--7scenes)
 1. [Cite](#scroll-cite)
@@ -72,6 +74,7 @@ train/
 │   ├── intrinsics.txt
 │   ├── overlaps.npz
 │   ├── poses.txt
+│   ├── poses_device.txt
 │   ├── seq0
 │   │   ├── frame_00000.jpg
 │   │   ├── frame_00001.jpg
@@ -122,17 +125,61 @@ overlap = overlaps[filter_idx]
 
 Note:
 - Although we computed overlap scores exhaustively between any two pairs, we only provide rows for pairs of frames with non-zero overlap score.
+ 
+### **poses_device.txt**
+
+> **Do not use for the Single Frame leaderboard!**
+
+Contains the device tracking poses from the phone manufacturer's SDK.  
+The format is the same as `poses.txt`.  
+The validation and test poses have been transformed so the query frame (every 10th starting from index `9`: `9`, `19`, `29`, ...) has identity pose.  
+Every 10th frame (index `0`, `10`, `20`, ...) is omitted.
+
+<summary>An example pose file <code>poses_device.txt</code> for scene <code>s00525</code> looks like this:
+<details>
+<pre><code>seq1/frame_00001.jpg 0.9994922096860480 0.0269317176591893 -0.0157003063652646 0.0065958881785289 0.0466694878078898 -0.0281468845572431 -0.0112877194474297
+seq1/frame_00002.jpg 0.9993580756483937 0.0328725115523059 -0.0127593038213454 0.0063273048430992 0.0339232485038949 -0.0285098757477421 -0.0120072983452042
+seq1/frame_00003.jpg 0.9994095257784243 0.0337710521318569 -0.0057182100130971 0.0027235813735874 0.0238052857804480 -0.0263538300263913 -0.0098207667922940
+seq1/frame_00004.jpg 0.9994142775149452 0.0341439298347318 -0.0013558587396570 0.0018589249041177 0.0177697615576487 -0.0244366729951603 -0.0091893336392181
+seq1/frame_00005.jpg 0.9994709356996739 0.0324462544438607 0.0008984342372670 0.0020693187535624 0.0107922389473231 -0.0218151599008894 -0.0084062276379855
+seq1/frame_00006.jpg 0.9995967759228006 0.0277079528389628 0.0055091728063658 0.0028642501995992 0.0086483965820601 -0.0177469278559197 -0.0056376986063943
+seq1/frame_00007.jpg 0.9997700434443832 0.0209458894930015 0.0026126274935355 0.0037820790767911 0.0037626691655388 -0.0130191227916635 -0.0046983244214344
+seq1/frame_00008.jpg 0.9999591047799402 0.0090371065943122 0.0000464505105742 0.0003425119760763 0.0020378531723056 -0.0062499045221460 -0.0016783057659518
+seq1/frame_00009.jpg 1.0000000000000000 0.0000000000000000 0.0000000000000000 0.0000000000000000 0.0000000000000000 -0.0000000000000000 0.0000000000000000
+seq1/frame_00011.jpg 0.9999122102115333 -0.0028343570013565 0.0028833026511983 0.0126184331870871 -0.0038358715402572 0.0055594114544770 0.0075361352095454
+seq1/frame_00012.jpg 0.9998977735666226 -0.0047589344722841 0.0016745278483207 0.0133787486591577 -0.0031548241889184 0.0074063254943168 0.0086534781681345
+seq1/frame_00013.jpg 0.9998630580470527 -0.0059850418371746 0.0037297007205538 0.0149710974727477 -0.0027377091384663 0.0057279687266299 0.0071799753997997
+seq1/frame_00014.jpg 0.9998568942634775 -0.0067123264981617 0.0044841433737789 0.0148670146626239 -0.0011100149021661 0.0055346086822823 0.0069199077735905
+seq1/frame_00015.jpg 0.9999031282964173 -0.0077794581986427 0.0058398554568458 0.0099554076469641 -0.0019798297167677 0.0060388098070261 0.0071602408425884
+seq1/frame_00016.jpg 0.9999428133748520 -0.0041002158190476 0.0082137724101253 0.0054856315058257 -0.0017442737456200 0.0055955883320382 0.0062599826478464
+seq1/frame_00017.jpg 0.9999532438929408 -0.0004901163942371 0.0095603423341645 0.0013673581676175 -0.0017108482765422 0.0037287971121049 0.0038656792198235
+seq1/frame_00018.jpg 0.9999822266759567 -0.0001296402465593 0.0059474062722850 0.0003973464916624 -0.0004313194774018 0.0029779679319886 0.0022206648539896
+seq1/frame_00019.jpg 1.0000000000000000 -0.0000000000000000 -0.0000000000000000 -0.0000000000000000 0.0000000000000000 0.0000000000000000 -0.0000000000000000
+seq1/frame_00021.jpg 0.9991174014534908 0.0043753050099131 -0.0416160156387965 0.0036581499758310 0.0562188890774214 0.0042611520775912 -0.0473521267483975
+seq1/frame_00022.jpg 0.9990560273656551 0.0038494243152731 -0.0429731102874402 0.0050544939430033 0.0558714356884079 0.0034168273536300 -0.0450965029545426
+seq1/frame_00023.jpg 0.9990875933607486 0.0021750478867534 -0.0423298259151342 0.0052379191777077 0.0528036499976063 0.0031465186443718 -0.0411179893617076
+seq1/frame_00024.jpg 0.9992377263670008 0.0024872418219241 -0.0387361526318281 0.0041581621312520 0.0475880347991984 0.0026831537403738 -0.0362958779137877
+seq1/frame_00025.jpg 0.9993967524819487 0.0036629261148744 -0.0344794623038099 0.0019699695560448 0.0398738931715040 0.0024435673020757 -0.0295831119567668
+seq1/frame_00026.jpg 0.9995529645105627 -0.0004513363056441 -0.0298478633269434 0.0016650791275553 0.0312575393448512 0.0019572990905338 -0.0227725361872360
+seq1/frame_00027.jpg 0.9997698959650141 -0.0040998720240126 -0.0210341558093146 -0.0009541807383061 0.0217680306351583 0.0022364192489630 -0.0162964098631040
+seq1/frame_00028.jpg 0.9999206319606756 -0.0048881610389706 -0.0115652795830969 -0.0010392156586288 0.0113113719530353 0.0012417926242774 -0.0088103880189187
+seq1/frame_00029.jpg 1.0000000000000000 -0.0000000000000000 0.0000000000000000 0.0000000000000000 0.0000000000000000 0.0000000000000000 0.0000000000000000
+seq1/frame_00031.jpg 0.9995818924078186 -0.0134629527639872 0.0009004909140705 -0.0255730011807886 0.1250073985932690 0.0113964897011485 -0.0671276419939781
+# ...</code></pre></details></summary>
 
 ## Data Loader
 We provide a reference PyTorch dataloader for our dataset in [lib/datasets/mapfree.py](lib/datasets/mapfree.py).
 
 # :bar_chart: Evaluate Your Method 
-We provide an [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/) to evaluate submissions on the test set.
+We provide an [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/) to evaluate submissions on the test set.  
+There are two tracks: [Single Frame](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard?t=single) and [Multi Frame](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard?t=multi9).
 
-Note that, for the public leaderboard, **we only allow submissions that use single query frames** for their estimates. That is, methods using multi-frame queries are not allowed. If you are interested in a multi-frame version of the task, please reach out to mapfree-reloc@nianticlabs.com as we might extend the benchmark in the future.
+Note that, for the **Single Frame** public leaderboard, **we only allow submissions that use single query frames** for their estimates. That is, methods using multi-frame queries are not allowed.  
+For the **Multi Frame** public leaderboard, we allow submissions that use up to 9 query frames (very specifically, the query frame and the 8 frames __before__ it) and the provided device tracking poses of those query frames for their estimates.  
+Methods using full query scans for their estimates are still **not** allowed.
 
 ## Submission Format
-The submission file is a ZIP file containing one txt file per scene:
+The submission file is a ZIP file containing one txt file per scene at its root level without any directories:
 ```
 submission.zip
 ├── pose_s00525.txt
@@ -147,13 +194,47 @@ Each of the text files should contain the estimated pose for the query frame wit
 frame_path qw qx qy qz tx ty tz confidence
 ```
 
-Note that the evaluation only considers every 5th frame of the query sequence, so one does not have to compute the estimated pose for all query frames. This is accounted for in [our dataloader](lib/datasets/mapfree.py#L173).
+### Single Frame track
+
+Note that the evaluation for the Single Frame leaderboard only considers every 5th frame of the query sequence, so one does not have to compute the estimated pose for all query frames. This is accounted for in [our dataloader](lib/datasets/mapfree.py#L317).
+
+An example pose file `pose_s00525.txt` for scene `s00525` would look like this:
+```
+seq1/frame_00000.jpg 0.981085 0.020694 0.191351 0.020694 -1.108672 -0.215504 1.129422 519.7958984375
+seq1/frame_00005.jpg 0.976938 0.035391 0.209076 0.025041 -1.198505 -0.254750 1.225280 480.41900634765625
+seq1/frame_00010.jpg 0.977999 -0.003629 0.207880 0.017071 -1.139382 -0.119754 1.145658 530.1975708007812
+seq1/frame_00015.jpg 0.977930 -0.012163 0.207723 0.018884 -1.132435 -0.119024 0.955460 532.3636474609375
+seq1/frame_00020.jpg 0.978110 -0.001814 0.207904 0.008536 -1.157719 -0.121681 0.976792 457.1533813476562
+seq1/frame_00025.jpg 0.981478 -0.003330 0.190780 0.017132 -1.154860 -0.121381 1.161221 510.46484375
+seq1/frame_00030.jpg 0.963484 -0.004664 0.267198 0.016818 -1.262709 -0.132716 1.269665 518.1480102539062
+# ...
+```
+
+### Multi Frame track
+
+Note that the evaluation for the Multi Frame leaderboard only considers every 10th frame of the query sequence starting with the 10th (index `9`) frame, so one does not have to compute the estimated pose for all query frames. This is accounted for in [our dataloader](lib/datasets/mapfree.py#L321).
+
+An example pose file `pose_s00525.txt` for scene `s00525` would look like this:
+```
+seq1/frame_00009.jpg 1 0 0 0 1.0 2 3 100 
+seq1/frame_00019.jpg 1 0 0 0 1.1 2 3 200 
+seq1/frame_00029.jpg 1 0 0 0 1.2 2 3 300 
+seq1/frame_00039.jpg 1 0 0 0 1.3 2 3 400 
+# ...
+```
 
 ## Submission Script
 We provide a [submission script](submission.py) to generate submission files:
 ```shell
 python submission.py <config file> [--checkpoint <path_to_model_checkpoint>] -o results/your_method
 ```
+
+The script reads the configuration of the dataset and the model to determine which track it runs.
+To switch between the single and multi-frame setup, configure the `QUERY_FRAME_COUNT` variable in the [Map-free dataset file](config/mapfree.yaml) as:
+* QUERY_FRAME_COUNT: 1 # (single frame task) or
+* QUERY_FRAME_COUNT: 9 # (multi-frame task)
+
+The model can be also configured accordingly depending on whether it expects single or multiple frames as input. See the [model builder file](lib/builder.py).
 
 The resulting file `results/your_method/submission.zip` can be uploaded to our [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/submit) and compared against existing methods in our [leaderboard](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard).
 
@@ -168,7 +249,7 @@ python -m benchmark.mapfree results/your_method/submission.zip --split val
 ```
 This is the same script used for evaluation in our benchmarking system, except we use the test set ground-truth poses.
 
-## Exemples of submissions for existing baselines
+## Examples of submissions for existing baselines
 You can generate submissions for the [Relative Pose Regression](#relative-pose-regression-baselines) and [Feature Matching](#feature-matching--scale-from-depth-baselines) baselines using
 ```shell
 # feature matching (SuperPoint+SuperGlue), scale from depth (DPT KITTI), Essential Matrix solver
@@ -209,6 +290,10 @@ Resume training from a checkpoint by adding `--resume {path_to_checkpoint}`
 
 The top five models, according to validation loss, are saved during training.
 Tensorboard results and checkpoints are saved into the folder `weights/experiment_name`.
+
+To switch between the single and multi-frame setup, configure the `QUERY_FRAME_COUNT` variable in the [Map-free dataset file](config/mapfree.yaml) as:
+* QUERY_FRAME_COUNT: 1 # (single frame task) or
+* QUERY_FRAME_COUNT: 9 # (multi-frame task)
 
 # Feature Matching + Scale from Depth Baselines
 We provide different feature matching (SIFT, [SuperPoint+SuperGlue](https://github.com/magicleap/SuperGluePretrainedNetwork), [LoFTR](https://github.com/zju3dv/LoFTR)), depth regression ([DPT](https://github.com/isl-org/DPT) KITTI, NYU) and pose solver (Essential Matrix Decomposition, PnP) variants.
