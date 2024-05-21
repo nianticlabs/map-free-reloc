@@ -1,4 +1,6 @@
 import torch
+from transforms3d.quaternions import qmult, qinverse, rotate_vector
+
 
 # Based on the paper : On the Continuity of Rotation Representations in Neural Networks
 # code from https://github.com/papagina/RotationContinuity/blob/master/Inverse_Kinematics/code/tools.py
@@ -51,3 +53,9 @@ def rotation_matrix_from_ortho6d(poses):
     z = z.view(-1, 3, 1)
     matrix = torch.cat((x, y, z), 2)  # batch*3*3
     return matrix
+
+
+def relative_pose_wxyz(q1_wxyz, t1, q2_wxyz, t2):
+    q12_wxyz = qmult(q2_wxyz, qinverse(q1_wxyz))
+    t12 = t2 - rotate_vector(t1, q12_wxyz)
+    return q12_wxyz, t12

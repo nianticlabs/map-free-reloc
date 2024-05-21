@@ -1,5 +1,5 @@
 import torch
-from kornia.geometry.conversions import quaternion_to_rotation_matrix, QuaternionCoeffOrder
+from kornia.geometry.conversions import quaternion_to_rotation_matrix
 from scipy.spatial.transform import Rotation
 
 from lib.models.regression.encoder.preact import PreActBlock
@@ -189,7 +189,7 @@ class QuatDeepResBlock(DeepResBlock):
 
         quat = torch.nn.functional.normalize(x[:, :4], dim=1)
         data['q'] = quat
-        R = quaternion_to_rotation_matrix(quat, order=QuaternionCoeffOrder.WXYZ)
+        R = quaternion_to_rotation_matrix(quat)
 
         if self.regress_scale:
             scale = torch.abs(x[:, 4]).view(B, 1, 1)

@@ -8,6 +8,7 @@ from lib.models.regression.encoder.resunet import ResUNet
 
 from lib.utils.loss import *
 from lib.utils.metrics import pose_error_torch, error_auc, A_metrics
+from matplotlib import pyplot as plt
 
 
 class RegressionModel(pl.LightningModule):
@@ -57,6 +58,9 @@ class RegressionModel(pl.LightningModule):
             self.s_r = torch.nn.Parameter(torch.zeros(1))
             self.s_t = torch.nn.Parameter(torch.zeros(1))
 
+        # Variable to store validation outputs
+        self.validation_step_outputs = []
+
     def forward(self, data):
         vol0 = self.encoder(data['image0'])
         vol1 = self.encoder(data['image1'])
@@ -73,7 +77,7 @@ class RegressionModel(pl.LightningModule):
         t_loss = self.trans_loss(data)
 
         if self.LAMBDA == 0:
-            # PoseNet (Kendal & Cipolla) lernable loss scaling
+            # PoseNet (Kendall & Cipolla) learnable loss scaling
             loss = R_loss * torch.exp(-self.s_r) + t_loss * torch.exp(-self.s_t) + self.s_r + self.s_t
         else:
             loss = R_loss + self.LAMBDA * t_loss
@@ -102,13 +106,17 @@ class RegressionModel(pl.LightningModule):
         outputs['R_loss'] = R_loss
         outputs['t_loss'] = t_loss
         outputs['loss'] = loss
+
+        self.validation_step_outputs.append(outputs)
+
         return outputs
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
+
         # aggregates metrics/losses from all validation steps
         aggregated = {}
-        for key in outputs[0].keys():
-            aggregated[key] = torch.stack([x[key] for x in outputs])
+        for key in self.validation_step_outputs[0].keys():
+            aggregated[key] = torch.stack([x[key] for x in self.validation_step_outputs])
 
         # compute stats
         median_t_ang_err = aggregated['t_err_ang'].median()
@@ -165,6 +173,8 @@ class RegressionModel(pl.LightningModule):
         self.log('val_t_scale/a2', a2)
         self.log('val_t_scale/a3', a3)
 
+        self.validation_step_outputs.clear()  # free memory
+
         return mean_loss
 
     def configure_optimizers(self):
@@ -175,3 +185,66 @@ class RegressionModel(pl.LightningModule):
                 opt, tcfg.LR_STEP_INTERVAL, tcfg.LR_STEP_GAMMA)
             return {'optimizer': opt, 'lr_scheduler': {'scheduler': scheduler, 'interval': 'step'}}
         return opt
+
+
+def show_device_poses(data):
+    from transforms3d.quaternions import qinverse, qmult, rotate_vector, quat2mat
+    import numpy as np
+    with torch.no_grad():
+        if 'abs_c_1_c2w_multi' in data:
+            fig = plt.figure(figsize=(16, 20))
+            for batch_id in range(0, data['abs_c_1_c2w_multi'].shape[0], 2):
+                ax = fig.add_subplot(2, 3, batch_id // 2 + 1, projection='3d')
+                ax.set_aspect('equal')
+                points = []
+                for color, (key_q, key_t) in (
+                    (('r', 'g', 'b'), ('abs_q_1_c2w_multi', 'abs_c_1_c2w_multi')),
+                    (('c', 'm', 'k'), ('abs_q_1_c2w_device', 'abs_c_1_c2w_device'))):
+                    data_q = data[key_q][batch_id]
+                    data_t = data[key_t][batch_id]
+                    for i in range(data_q.shape[0]):
+                        c0 = data_t[i, :].cpu().numpy()
+                        points.append(c0)
+
+                        x = rotate_vector((0.05, 0., 0.), data_q[i, :].cpu().numpy())
+                        ax.quiver(c0[0], c0[1], c0[2], x[0], x[1], x[2], color=color[0])
+                        points.append(c0 + x)
+
+                        y = rotate_vector((0, 0.05, 0.), data_q[i, :].cpu().numpy())
+                        ax.quiver(c0[0], c0[1], c0[2], y[0], y[1], y[2], color=color[1])
+                        points.append(c0 + y)
+
+                        z = rotate_vector((0, 0, 0.05), data_q[i, :].cpu().numpy())
+                        ax.quiver(c0[0], c0[1], c0[2], z[0], z[1], z[2], color=color[2])
+                        points.append(c0 + z)
+
+                ax.set_xlabel('x')
+                ax.set_ylabel('y')
+                ax.set_zlabel('z')
+                center = np.mean(points, axis=0)
+                bounds = np.max(points, axis=0) - np.min(points, axis=0)
+                max_bound = np.max(bounds) / 2.
+                ax.set_xlim(center[0] - max_bound, center[0] + max_bound)
+                ax.set_ylim(center[1] - max_bound, center[1] + max_bound)
+                ax.set_zlim(center[2] - max_bound, center[2] + max_bound)
+                ax.view_init(elev=0, azim=-90, roll=0, vertical_axis='z')
+
+            plt.show()
+            plt.close()
+
+
+class RegressionMultiFrameModel(RegressionModel):
+    def forward(self, data):
+        if False:
+            show_device_poses(data)
+        vol0 = self.encoder(data['image0'])
+        vol1 = self.encoder(data['image1'][:, -1, ...])
+
+        global_volume = self.aggregator(vol0, vol1)
+        R, t = self.head(global_volume, data)
+        data['R'] = R
+        data['t'] = t
+        data['inliers'] = 0
+        return R, t
+
+
