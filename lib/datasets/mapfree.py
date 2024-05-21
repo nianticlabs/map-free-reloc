@@ -1,14 +1,15 @@
-from pathlib import Path
+import concurrent.futures
 import re
+from pathlib import Path
 
+import numpy as np
 import torch
 import torch.utils.data as data
-import numpy as np
-from transforms3d.quaternions import qinverse, qmult, rotate_vector, quat2mat
-
-from lib.datasets.utils import read_color_image, read_depth_image, correct_intrinsic_scale
 from pytorch_lightning import _logger as logger
+from tqdm import tqdm
+from transforms3d.quaternions import qinverse, qmult, quat2mat, rotate_vector
 
+from lib.datasets.utils import correct_intrinsic_scale, read_color_image, read_depth_image
 from lib.utils.rotationutils import relative_pose_wxyz
 
 
@@ -86,52 +87,118 @@ class MapFreeScene(data.Dataset):
         if overlaps_path.exists():  # train case
             f = np.load(overlaps_path, allow_pickle=True)
             idxs, overlaps = f['idxs'], f['overlaps']
+
+            if 0 < sample_offset:  # multi-frame case, needs to happen before masking
+                valid_frame_ids = {
+                    0: sorted(
+                        # pairs from the first two columns with the pattern (0, imgId)
+                        set(idxs[idxs[:, 0] == 0, 1])
+                        # pairs from the second two columns with the pattern (0, imgId)
+                        | set(idxs[idxs[:, 2] == 0, 3])),
+                    1: sorted(
+                        # pairs from the first two columns with the pattern (1, imgId)
+                        set(idxs[idxs[:, 0] == 1, 1])
+                        # pairs from the second two columns with the pattern (1, imgId)
+                        | set(idxs[idxs[:, 2] == 1, 3]))
+                }
+                # reverse lookup: imgId -> linear ID in valid_frame_ids
+                img_id_to_valid_frame_ids = {
+                    0: {imgA: i for i, imgA in enumerate(valid_frame_ids[0])},
+                    1: {imgB: i for i, imgB in enumerate(valid_frame_ids[1])}}
+
             if overlap_limits is not None:
                 min_overlap, max_overlap = overlap_limits
-                mask = (overlaps > min_overlap) * (overlaps < max_overlap)
+                mask = np.logical_and((min_overlap < overlaps), (overlaps < max_overlap))
                 idxs = idxs[mask]
-            if 1 < sample_offset:
-                idxs2 = []
-                for seqA, imgA, seqB, imgB in idxs:
-                    if seqA == seqB:  # filter cases where the query sequence contains the
-                        queries = [imgB_
-                                   for i in range(sample_offset)
-                                   if (0 <= (imgB_ := imgB - sample_offset + 1 + i)
-                                       and imgB_ != imgA)  # don't allow the map frame in the query
-                                   ]
-                    else:
-                        queries = [imgB_
-                                   for i in range(sample_offset)
-                                   if 0 <= (imgB_ := imgB - sample_offset + 1 + i)]
-                    if len(queries) == sample_offset:
-                        idxs2.append((seqA, imgA, seqB, tuple(queries)))
-                print(f"Filtered {len(idxs) - len(idxs2)} pairs")
-                idxs = idxs2
-                del idxs2
-            else:
+
+            if 0 == sample_offset:  # single frame case
                 assert sample_factor == 1
+            else:  # multi frame case
+                idxs_multi = [
+                    (  # a row in idxs is a tuple of 4
+                        seqA, imgA, seqB,
+                        tuple(
+                            valid_frame_ids_B[idx_in_valid_frame_ids - sample_offset + 1 + i]
+                            for i in range(sample_offset)
+                        ),
+                    )  # end of row in idxs
+                    for seqA, imgA, seqB, imgB in idxs
+                    if (
+                        # cache dict lookup
+                        ((valid_frame_ids_B := valid_frame_ids[seqB]) is not None)
+                        # the previous 8 frames start earliest from 0
+                        and (0 <= (idx_in_valid_frame_ids := img_id_to_valid_frame_ids[seqB][imgB])
+                                  - sample_offset + 1)
+                        and (
+                            # and either they are from different sequences
+                            (seqA != seqB)
+                            # or the map imgA frame does **not** fall into the span [imgB-8...imgB]
+                            or (imgA
+                                < valid_frame_ids_B[idx_in_valid_frame_ids - sample_offset + 1])
+                            or (imgB < imgA)
+                        )  # end of and
+                    )  # end of if
+                ]  # end of list comprehension
+
+                idxs = idxs_multi
+                del idxs_multi
+
+            # TODO: figure out why copy is needed
             return idxs.copy()
         else:  # val and test case
             idxs = np.zeros((len(self.poses) - 1, 4), dtype=np.uint16)
             idxs[:, 2] = 1
             # match number between '_' and '.' in the filename, e.g. 'seq1/frame_00001.jpg'
-            pattern = r'_(\d+)\..*$'
-            idxs[:, 3] = np.array([re.search(pattern, fn).group(1)
-                                   for fn in self.poses.keys()
-                                   if 'seq0' not in fn],
-                                  dtype=np.uint16)
-            idxs = idxs[sample_offset::sample_factor]
-            if 1 < sample_offset:
-                idxs = [(seqA, imgA, seqB, tuple(range(imgB - sample_offset + 1, imgB + 1)))
-                        for seqA, imgA, seqB, imgB in idxs]
-            else:
-                assert sample_factor == 5
+            pattern = r"_(\d+)\..*$"
+            idxs[:, 3] = np.array(
+                sorted((  # sorted is not strictly needed
+                    re.search(pattern, fn).group(1)
+                    for fn in self.poses.keys()
+                    if "seq0" not in fn
+                )),
+                dtype=np.uint16,
+            )
 
-            # a = np.empty(dtype=np.dtype([('a', (int, 3)), ('b', (int, 9))]))
-            # a[:, :3] = idxs[:, :3]
-            # for
-            # idxs[:, 3] = np.tile(idxs[:, 3:4], (1, sample_offset)) \
-            #              + np.tile(np.arange(-sample_offset + 1, 1), (idxs.shape[0], 1))
+            if 0 == sample_offset:  # single frame case
+                # just filter
+                idxs = idxs[sample_offset::sample_factor]
+                assert sample_factor == 5
+            else:  # multi frame case
+                # remember chosen linear IDs in idxs
+                # example: [9, 19, 29, ...]
+                idxs_indices = np.arange(len(idxs))[sample_offset::sample_factor]
+
+                # construct reverse lookup imgId --> linear ID in idxs
+                # example (s00460): {9: 9, 19: 19, 29: 29, 39: 39, ...}
+                # example (s00470): {11: 9, 21: 19, 31: 29, 41: 39, ...}
+                imgB_to_idxs_indices = {
+                    idxs[idxs_index, 3]: idxs_index for idxs_index in idxs_indices
+                }
+
+                # perform filtering and sequencing in one step
+                # example (s00460): [(0, 0, 1, (1, 2, 3, 4, 5, 6, 7, 8, 9)),
+                #                    (0, 0, 1, (11, 12, 13, 14, 15, 16, 17, 18, 19)),
+                #                    ...]
+                # example (s00470): [(0, 0, 1, (1, 3, 5, 6, 7, 8, 9, 10, 11)),
+                #                    (0, 0, 1, (13, 14, 15, 16, 17, 18, 19, 20, 21)),
+                #                    ...]
+                idxs = [
+                    (
+                        seqA,
+                        imgA,
+                        seqB,
+                        tuple(
+                            idxs[i, 3]  # get imgB from the fourth column
+                            for i in range(
+                                idxs_index - sample_offset + 1,  # 9 - 9 + 1 = 1
+                                idxs_index + 1,  # 9 + 1 = 10
+                            )  # get rows 1 to 10-1 from the unfiltered idxs
+                        ),
+                    )
+                    for seqA, imgA, seqB, imgB in idxs[sample_offset::sample_factor]
+                    # this should never happen, but allows us to do the dict lookup only once
+                    if sample_offset <= (idxs_index := imgB_to_idxs_indices[imgB])
+                ]
             return idxs
 
     def get_pair_path(self, pair):
@@ -215,11 +282,7 @@ class MapFreeSceneMultiFrame(MapFreeScene):
                          sample_offset=sample_offset)
 
         # load device tracking poses
-        # if 'train' not in str(self.scene_root):
         self.poses_device = self.read_poses(scene_root=self.scene_root, filename='poses_device.txt')
-        # else:
-        #     self.poses_device = None
-        #     print("TODO: put back for train")
 
     def get_pair_path(self, pair):
         seqA, imgA, seqB, imgB = pair
@@ -314,10 +377,14 @@ class MapFreeDataset(data.ConcatDataset):
         assert isinstance(cfg.DATASET.QUERY_FRAME_COUNT, int)
 
         if cfg.DATASET.QUERY_FRAME_COUNT == 1:
+            if 'multi' in cfg.MODEL.lower():
+                raise ValueError(f"Model {cfg.MODEL} is not compatible with a single frame dataset!")
             sample_factor = {'train': 1, 'val': 5, 'test': 5}[mode]
             sample_offset = 0
             SceneClass = MapFreeScene
         else:
+            if 'multi' not in cfg.MODEL.lower():
+                raise ValueError(f"Model {cfg.MODEL} is not compatible with a multi frame dataset!")
             sample_factor = cfg.DATASET.QUERY_FRAME_COUNT + 1
             sample_offset = cfg.DATASET.QUERY_FRAME_COUNT  # the first frame to evaluate
             # e.g. from  1,  2,  3,  4,  5,  6,  7,  8,  9 predict the relative pose of 9, then
@@ -333,9 +400,20 @@ class MapFreeDataset(data.ConcatDataset):
             scenes = [s for s in scenes if (data_root / s).exists()]
 
         # Init dataset objects for each scene
-        data_srcs = [
-            SceneClass(
-                scene_root=data_root / scene, resize=resize, sample_factor=sample_factor,
-                overlap_limits=overlap_limits, transforms=transforms,
-                estimated_depth=estimated_depth, sample_offset=sample_offset) for scene in scenes]
+        with concurrent.futures.ProcessPoolExecutor(max_workers=cfg.TRAINING.NUM_WORKERS) \
+                as executor:
+            futures = [executor.submit(SceneClass,
+                                       scene_root=data_root / scene,
+                                       resize=resize,
+                                       sample_factor=sample_factor,
+                                       overlap_limits=overlap_limits,
+                                       transforms=transforms,
+                                       estimated_depth=estimated_depth,
+                                       sample_offset=sample_offset)
+                       for scene in scenes]
+            data_srcs = []
+            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures),
+                               desc=f"Loading {mode} scenes"):
+                data_srcs.append(future.result())
+
         super().__init__(data_srcs)

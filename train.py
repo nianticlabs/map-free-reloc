@@ -1,5 +1,7 @@
 import argparse
 import os
+from pathlib import Path
+
 # do this before importing numpy! (doing it right up here in case numpy is dependency of e.g. json)
 os.environ["MKL_NUM_THREADS"] = "1"  # noqa: E402
 os.environ["NUMEXPR_NUM_THREADS"] = "1"  # noqa: E402
@@ -10,13 +12,17 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from config.default import cfg
+from config.utils import config_merge_from_file
 from lib.datasets.datamodules import DataModule
 from lib.models.regression.model import RegressionModel, RegressionMultiFrameModel
 
 
 def main(args):
-    cfg.merge_from_file(args.dataset_config)
-    cfg.merge_from_file(args.config)
+    global cfg
+    cfg = config_merge_from_file(cfg=cfg, path_to_config=args.dataset_config)
+    cfg = config_merge_from_file(cfg=cfg, path_to_config=args.config)
+
+    pl.seed_everything(0)
 
     datamodule = DataModule(cfg)
     if cfg.MODEL == 'RegressionMultiFrame':
@@ -69,14 +75,33 @@ if __name__ == '__main__':
     Multi-frame query:
     ```shell
     python3 train.py \
-      config/regression/mapfree/multiframe/3d3d_multi.yaml config/mapfree.yaml
+      config/regression/mapfree/multiframe/3d3d_multi.yaml \
+      config/mapfree.yaml \
+      config/mapfree_multi.yaml
     ```
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('config', help='path to config file')
-    parser.add_argument('dataset_config', help='path to dataset config file')
+    parser.add_argument('config', action='append', help='path to config file')
+    parser.add_argument('dataset_config', nargs='+', action='store',
+                        help='path to dataset config file')
+    parser.add_argument('--config', action='append', dest='config',
+                        help='one more path to a config file')
+    parser.add_argument('--dataset-config', '--dataset_config', action='append',
+                        dest='dataset_config', help='one more path to a dataset config file')
     parser.add_argument('--experiment', help='experiment name', default='default')
     parser.add_argument('--resume', help='resume from checkpoint path', default=None)
     args = parser.parse_args()
+
+    assert isinstance(args.config, (list, tuple, str, Path))
+    # make sure we don't have nested lists by accident
+    if isinstance(args.config, (list, tuple)):
+        for args_config in args.config:
+            assert isinstance(args_config, (str, Path))
+
+    assert isinstance(args.dataset_config, (list, tuple, str, Path))
+    # make sure we don't have nested lists by accident
+    if isinstance(args.dataset_config, (list, tuple)):
+        for args_dataset_config in args.dataset_config:
+            assert isinstance(args_dataset_config, (str, Path))
 
     main(args)
