@@ -1,0 +1,2 @@
+DATASET:
+  QUERY_FRAME_COUNT: 9    # 1 (single frame task) or 9 (multi-frame task) only!
