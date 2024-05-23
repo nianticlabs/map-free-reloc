@@ -378,13 +378,13 @@ class MapFreeDataset(data.ConcatDataset):
 
         if cfg.DATASET.QUERY_FRAME_COUNT == 1:
             if 'multi' in cfg.MODEL.lower():
-                raise ValueError(f"Model {cfg.MODEL} is not compatible with a single frame dataset!")
+                logger.warning(f"Model {cfg.MODEL} is not compatible with a single frame dataset!")
             sample_factor = {'train': 1, 'val': 5, 'test': 5}[mode]
             sample_offset = 0
             SceneClass = MapFreeScene
         else:
             if 'multi' not in cfg.MODEL.lower():
-                raise ValueError(f"Model {cfg.MODEL} is not compatible with a multi frame dataset!")
+                logger.warning(f"Model {cfg.MODEL} is not compatible with a multi frame dataset!")
             sample_factor = cfg.DATASET.QUERY_FRAME_COUNT + 1
             sample_offset = cfg.DATASET.QUERY_FRAME_COUNT  # the first frame to evaluate
             # e.g. from  1,  2,  3,  4,  5,  6,  7,  8,  9 predict the relative pose of 9, then

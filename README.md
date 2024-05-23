@@ -231,8 +231,8 @@ python submission.py <config file> [--checkpoint <path_to_model_checkpoint>] -o 
 
 The script reads the configuration of the dataset and the model to determine which track it runs.
 To switch between the single and multi-frame setup, configure the `QUERY_FRAME_COUNT` variable in the [Map-free dataset file](config/mapfree.yaml#L11) as:
-* QUERY_FRAME_COUNT: 1 # (single frame task) or
-* QUERY_FRAME_COUNT: 9 # (multi-frame task)
+* `QUERY_FRAME_COUNT: 1 # (single frame task)` or
+* `QUERY_FRAME_COUNT: 9 # (multi-frame task)`
 
 The model can be also configured accordingly depending on whether it expects single or multiple frames as input. See the [model builder file](lib/models/builder.py).
 
@@ -280,10 +280,18 @@ We provide multiple variants for the [encoder](lib/models/regression/encoder), [
 One can also define a custom model by registering it in [lib/models/builder.py](lib/models/builder.py). Given a pair of RGB images, the model must be able to estimate the metric relative pose between the pair of cameras.
 
 ## Training a Model
-To train a model, use:
+
+### Single Frame track
+
+To train a single frame model, use:
 ```shell
 python train.py config/regression/<dataset>/{model variant}.yaml \
                 config/{dataset config}.yaml \
+                --experiment experiment_name
+                
+# Example                
+python train.py config/regression/mapfree/3d3d.yaml \
+                config/mapfree.yaml \
                 --experiment experiment_name
 ```
 Resume training from a checkpoint by adding `--resume {path_to_checkpoint}`
@@ -291,9 +299,20 @@ Resume training from a checkpoint by adding `--resume {path_to_checkpoint}`
 The top five models, according to validation loss, are saved during training.
 Tensorboard results and checkpoints are saved into the folder `weights/experiment_name`.
 
-To switch between the single and multi-frame setup, configure the `QUERY_FRAME_COUNT` variable in the [Map-free dataset file](config/mapfree.yaml#L11) as:
-* QUERY_FRAME_COUNT: 1 # (single frame task) or
-* QUERY_FRAME_COUNT: 9 # (multi-frame task)
+### Multi Frame track
+
+An example call to train a multi frame model:
+```shell
+python3 train.py config/regression/mapfree/multiframe/3d3d_multi.yaml \
+                 config/mapfree.yaml config/mapfree_multi.yaml \
+                 --experiment experiment_name
+```
+
+To switch between the single and multi frame setup, configure the `QUERY_FRAME_COUNT` variable in the [Map-free dataset file](config/mapfree.yaml#L11) or [config/mapfree_multi.yaml#L2](config/mapfree_multi.yaml#L2) as:
+* `QUERY_FRAME_COUNT: 1 # (single frame task)` or
+* `QUERY_FRAME_COUNT: 9 # (multi-frame task)`
+* > Remember: the second dataset config file (e.g. `config/mapfree_multi.yaml`) overwrites
+  > the values in the first (e.g. `config/mapfree.yaml`).
 
 # Feature Matching + Scale from Depth Baselines
 We provide different feature matching (SIFT, [SuperPoint+SuperGlue](https://github.com/magicleap/SuperGluePretrainedNetwork), [LoFTR](https://github.com/zju3dv/LoFTR)), depth regression ([DPT](https://github.com/isl-org/DPT) KITTI, NYU) and pose solver (Essential Matrix Decomposition, PnP) variants.

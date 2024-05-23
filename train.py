@@ -84,8 +84,10 @@ if __name__ == '__main__':
     parser.add_argument('config', action='append', help='path to config file')
     parser.add_argument('dataset_config', nargs='+', action='store',
                         help='path to dataset config file')
+    # Allow for further config files to be added. Later values overwrite earlier ones.
     parser.add_argument('--config', action='append', dest='config',
                         help='one more path to a config file')
+    # Allow for further dataset-config files to be added. Later values overwrite earlier ones.
     parser.add_argument('--dataset-config', '--dataset_config', action='append',
                         dest='dataset_config', help='one more path to a dataset config file')
     parser.add_argument('--experiment', help='experiment name', default='default')
