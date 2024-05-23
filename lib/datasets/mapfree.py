@@ -304,10 +304,11 @@ class MapFreeSceneMultiFrame(MapFreeScene):
         if self.estimated_depth is not None:
             dim1_path = str(self.scene_root / im1_path).replace('.jpg',
                                                                 f'.{self.estimated_depth}.png')
-            dim2_path = str(self.scene_root / im2_path).replace('.jpg',
-                                                                f'.{self.estimated_depth}.png')
             depth1 = read_depth_image(dim1_path)
-            depth2 = read_depth_image(dim2_path)
+            depth2 = torch.stack([
+                read_depth_image(
+                    path=(self.scene_root / im2_path_).with_suffix(f'.{self.estimated_depth}.png'))
+                for im2_path_ in im2_path])
         else:
             depth1 = depth2 = torch.tensor([])
 
