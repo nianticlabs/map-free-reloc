@@ -327,12 +327,12 @@ To reproduce feature matching methods baselines
 
 ## Download MicKey correspondences and depth files
 We also provide the depth maps and correspondences computed by [MicKey](https://github.com/nianticlabs/mickey).
-- Download [MicKey estimated depth maps](https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/assets/mickey_depths.tar.gz).
+- Download [MicKey depth maps](https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/assets/mickey_depths.tar.gz).
 - Download [MicKey correspondences](https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/assets/mickey_correspondences.zip).
 - Extract the contents of both files to `data/mapfree`
 
 ## Custom feature matching method
-We provide pre-computed correspondences (SIFT, SuperGlue+SuperPoint and LoFTR) in the path `data/mapfree/{val|test}/{scene}/correspondences_{feature_method}.npz`
+We provide pre-computed correspondences (SIFT, SuperGlue+SuperPoint, LoFTR and MicKey) in the path `data/mapfree/{val|test}/{scene}/correspondences_{feature_method}.npz`
 
 To try out your own feature matching methods you need to create a `npz` file storing the correspondences between the reference frame and all query frames for each scene. See steps below:
 1. Create a wrapper class to your feature matching method in [etc/feature_matching_baselines/matchers.py](etc/feature_matching_baselines/matchers.py)
