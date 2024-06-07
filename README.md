@@ -325,6 +325,12 @@ To reproduce feature matching methods baselines
 - Download [feature-matching correspondences](https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/assets/mapfree_correspondences.zip) (LoFTR and SuperPoint+SuperGlue).
 - Extract both files to `data/mapfree`
 
+## Download MicKey correspondences and depth files
+We also provide the depth maps and correspondences computed by [MicKey](https://github.com/nianticlabs/mickey).
+- Download [MicKey estimated depth maps](https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/assets/mickey_depths.tar.gz).
+- Download [MicKey correspondences](https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/assets/mickey_correspondences.zip).
+- Extract the contents of both files to `data/mapfree`
+
 ## Custom feature matching method
 We provide pre-computed correspondences (SIFT, SuperGlue+SuperPoint and LoFTR) in the path `data/mapfree/{val|test}/{scene}/correspondences_{feature_method}.npz`
 
