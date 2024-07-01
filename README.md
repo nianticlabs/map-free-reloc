@@ -392,7 +392,7 @@ Please cite our work if you find it useful or use any of our code
     }
 ```
 
-# ️:page_with_curl: License
+# ️:page_facing_up: License
 Copyright © Niantic, Inc. 2022. Patent Pending. All rights reserved. This code is for non-commercial use. Please see the [license file](LICENSE) for terms.
 
 # :pencil: Changelog
