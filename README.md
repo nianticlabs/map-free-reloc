@@ -36,13 +36,14 @@ We crowd-sourced a substantial new [dataset](#camera-map-free-visual-relocalizat
 1. [Setup](#nut_and_bolt-setup)
 1. [Our dataset](#camera-map-free-visual-relocalization-dataset)
 1. [Evaluate your method](#bar_chart-evaluate-your-method)
+1. [Visualise your method](#eye-visualise-your-method)
 1. [Baselines: Relative Pose Regression](#relative-pose-regression-baselines)
    1. [Single Frame track](#single-frame-track)
    1. [Multi Frame track](#multi-frame-track)
 1. [Baselines: Feature Matching + Scale from Estimated Depth](#feature-matching--scale-from-depth-baselines)
 1. [Extended Results (7Scenes & Scannet)](#results-on-scannet--7scenes)
 1. [Cite](#scroll-cite)
-1. [License](#️page_with_curl-license)
+1. [License](#page_with_curl-license)
 1. [Changelog](#pencil-changelog)
 1. [Acknowledgements](#octocat-acknowledgements)
 
@@ -266,6 +267,12 @@ python submission.py config/regression/mapfree/3d3d.yaml --checkpoint weights/ma
 ```
 You can explore more methods by inspecting [config/matching/mapfree](config/matching/mapfree) and [config/regression/mapfree](config/regression/mapfree).
 
+# :eye: Visualise Your Method
+
+We provide a script to visualise the estimated poses on the query images. 
+The script reads the estimated poses in the submission format and visualises errors with respect to the ground-truth poses, if available, e.g. for the validation set. 
+More details can be found in the [visualisation folder](visualisation/README.md). 
+
 # Relative Pose Regression Baselines
 
 ##  Pre-trained Models
@@ -396,6 +403,7 @@ Please cite our work if you find it useful or use any of our code
 Copyright © Niantic, Inc. 2022. Patent Pending. All rights reserved. This code is for non-commercial use. Please see the [license file](LICENSE) for terms.
 
 # :pencil: Changelog
+- 02/08/2024: added visualisation scripts
 - 31/08/2023: updated README.md with externally provdided depthmaps 
 - 22/06/2023: updated README.md leaderboard links
 - 20/02/2023: benchmark/mapfree.py gives more helpful warnings
