@@ -43,7 +43,7 @@ We crowd-sourced a substantial new [dataset](#camera-map-free-visual-relocalizat
 1. [Baselines: Feature Matching + Scale from Estimated Depth](#feature-matching--scale-from-depth-baselines)
 1. [Extended Results (7Scenes & Scannet)](#results-on-scannet--7scenes)
 1. [Cite](#scroll-cite)
-1. [License](#page_with_curl-license)
+1. [License](#page_with_curl--license)
 1. [Changelog](#pencil-changelog)
 1. [Acknowledgements](#octocat-acknowledgements)
 
@@ -271,7 +271,7 @@ You can explore more methods by inspecting [config/matching/mapfree](config/matc
 
 We provide a script to visualise the estimated poses on the query images. 
 The script reads the estimated poses in the submission format and visualises errors with respect to the ground-truth poses, if available, e.g. for the validation set. 
-More details can be found in the [visualisation folder](visualisation/README.md). 
+More details can be found in the [visualisation folder](visualisation/). 
 
 # Relative Pose Regression Baselines
 
