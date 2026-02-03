@@ -375,6 +375,7 @@ To use the custom depth maps, create a new config file, see *e.g.* [config/match
 
 **Externally provided custom depth estimation methods:**
 - [KBR depth predictions](https://github.com/jspenmar/slowtv_monodepth#mapfreereloc)
+- [DAv3 depth predictions](https://drive.google.com/file/d/1Gruq6QIFqROwUJLpIGYhN4MjAEoJIkvn/view?usp=sharing) (using [DAv3 DA3NESTED-GIANT-LARGE](https://github.com/ByteDance-Seed/Depth-Anything-3), provided by [David Nordström](https://github.com/davnords))
 
 ## Custom pose solver
 We provide three [pose solvers](lib/models/matching/pose_solver.py): Essential Matrix Decomposition (with metric pose using estimated depth), Perspective-n-Point (PnP) and Procrustes (rigid body transformation given 3D-3D correspondences).
