@@ -17,7 +17,7 @@
      <a href="https://twitter.com/eric_brachmann">Eric Brachmann</a>
   </p>
   <h2 align="center">ECCV 2022</h2>
-  <h3 align="center"><a href="https://research.nianticlabs.com/mapfree-reloc-benchmark">Project Page</a> | <a href="https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/MapFreeReloc-ECCV22-paper.pdf">Paper</a> | <a href="https://arxiv.org/abs/2210.05494">arXiv</a> | <a href="https://storage.cloud.google.com/niantic-lon-static/research/map-free-reloc/MapFreeReloc-ECCV22-supplemental.pdf">Supplemental</a> </h3> 
+  <h3 align="center"><a href="https://nianticspatial.com/research/map-free">Project Page</a> | <a href="https://storage.googleapis.com/niantic-lon-static/research/map-free-reloc/MapFreeReloc-ECCV22-paper.pdf">Paper</a> | <a href="https://arxiv.org/abs/2210.05494">arXiv</a> | <a href="https://storage.cloud.google.com/niantic-lon-static/research/map-free-reloc/MapFreeReloc-ECCV22-supplemental.pdf">Supplemental</a> </h3> 
   <div align="center"></div>
 </p>
 
@@ -25,7 +25,7 @@ This is the reference implementation of the paper **"Map-free Visual Relocalizat
 
 Standard visual relocalization requires hundreds of images and scale calibration to build a scene-specific 3D map. In contrast, we propose Map-free Relocalization, i.e., using only one photo of a scene to enable instant, metric scaled relocalization.
 
-We crowd-sourced a substantial new [dataset](#camera-map-free-visual-relocalization-dataset) for this task, consisting of 655 places. We also define a new benchmark based on this dataset that includes a public [leaderboard](https://research.nianticlabs.com/mapfree-reloc-benchmark).
+We crowd-sourced a substantial new [dataset](#camera-map-free-visual-relocalization-dataset) for this task, consisting of 655 places. We also define a new benchmark based on this dataset that includes a public [leaderboard](https://nianticspatial.com/research/map-free/leaderboard).
 
 <p align="center">
     <img src="etc/teaser.png" alt="teaser" width="90%">
@@ -57,9 +57,9 @@ conda activate mapfree
 We used PyTorch 1.8, PyTorch Lightning 1.6.5, CUDA toolkit 11.1, Python 3.7.12 and Debian GNU/Linux 10.
 
 # :camera: Map-free Visual Relocalization Dataset
-We introduce a new [dataset](https://research.nianticlabs.com/mapfree-reloc-benchmark/dataset) for development and evaluation of map-free relocalization. The dataset consists of 655 outdoor scenes, each containing a small ‘place of interest’ such as a sculpture, sign, mural, etc.
+We introduce a new [dataset](https://nianticspatial.com/research/map-free/dataset) for development and evaluation of map-free relocalization. The dataset consists of 655 outdoor scenes, each containing a small ‘place of interest’ such as a sculpture, sign, mural, etc.
 
-To use our code, download [our dataset](https://research.nianticlabs.com/mapfree-reloc-benchmark/dataset) and extract train/val/test.zip files into `data/mapfree`.
+To use our code, download [our dataset](https://nianticspatial.com/research/map-free/dataset) and extract train/val/test.zip files into `data/mapfree`.
 
 ## Organization
 The dataset is split into 460 training scenes, 65 validation scenes and 130 test scenes.
@@ -106,7 +106,7 @@ where $q$ is the quaternion encoding rotation and $t$ is the **metric** translat
 Note:
 - The pose is given in world-to-camera format, i.e. $R(q), t$ transform a world point $p$ to the camera coordinate system as $Rp + t$.
 - For val/test scenes, the reference frame (`seq0/frame_00000.jpg`) always has identity pose and the pose of query frames (`seq1/frame_*.jpg`) are given relative to the reference frame. Thus, the absolute pose of a given query frame is equivalent to the relative pose between the reference and the query frames.
-- We **DO NOT** provide ground-truth poses for the **test** scenes. These are kept private for evaluation in our [online benchmarking website](https://research.nianticlabs.com/mapfree-reloc-benchmark/). The poses provided for test sequences are invalid lines containing 0 for all parameters.
+- We **DO NOT** provide ground-truth poses for the **test** scenes. These are kept private for evaluation in our [online benchmarking website](https://nianticspatial.com/research/map-free). The poses provided for test sequences are invalid lines containing 0 for all parameters.
 - There might be "skipped frames", i.e. the linear id of a frame does not necessarily correspond to its frame number. 
 
 ### **overlaps.npz**
@@ -172,8 +172,8 @@ seq1/frame_00031.jpg 0.9995818924078186 -0.0134629527639872 0.0009004909140705 -
 We provide a reference PyTorch dataloader for our dataset in [lib/datasets/mapfree.py](lib/datasets/mapfree.py).
 
 # :bar_chart: Evaluate Your Method 
-We provide an [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/) to evaluate submissions on the test set.  
-There are two tracks: [Single Frame](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard?t=single) and [Multi Frame](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard?t=multi9).
+We provide an [online benchmark website](https://nianticspatial.com/research/map-free) to evaluate submissions on the test set.  
+There are two tracks: [Single Frame](https://nianticspatial.com/research/map-free/leaderboard?t=single) and [Multi Frame](https://nianticspatial.com/research/map-free/leaderboard?t=multi9).
 
 Note that, for the **Single Frame** public leaderboard, **we only allow submissions that use single query frames** for their estimates. That is, methods using multi-frame queries are not allowed.  
 For the **Multi Frame** public leaderboard, we allow submissions that use up to 9 query frames (very specifically, the query frame and the 8 frames __before__ it) and the provided device tracking poses of those query frames for their estimates.  
@@ -237,7 +237,7 @@ To switch between the single and multi-frame setup, configure the `QUERY_FRAME_C
 
 The model can be also configured accordingly depending on whether it expects single or multiple frames as input. See the [model builder file](lib/models/builder.py).
 
-The resulting file `results/your_method/submission.zip` can be uploaded to our [online benchmark website](https://research.nianticlabs.com/mapfree-reloc-benchmark/submit) and compared against existing methods in our [leaderboard](https://research.nianticlabs.com/mapfree-reloc-benchmark/leaderboard).
+The resulting file `results/your_method/submission.zip` can be uploaded to our [online benchmark website](https://nianticspatial.com/research/map-free/submit) and compared against existing methods in our [leaderboard](https://nianticspatial.com/research/map-free/leaderboard).
 
 ## Local evaluation
 We do **NOT** provide ground-truth poses for the test set. But you can still evaluate your method locally, *e.g.* for hyperparameter tuning or model selection, by generating a submission on the **validation set**
